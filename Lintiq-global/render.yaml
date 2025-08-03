@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: lintiq-simple
+    env: python
+    plan: starter
+    buildCommand: |
+      # Install Python dependencies
+      cd backend
+      pip install -r requirements.txt
+      
+      # Install Node.js dependencies and build frontend
+      cd ../frontend
+      npm install -g pnpm
+      pnpm install
+      pnpm run build
+      
+      # Copy built frontend to Flask static directory
+      cp -r dist/* ../backend/src/static/
+      
+      echo "Build completed successfully"
+    startCommand: |
+      cd backend
+      python src/main.py
+    healthCheckPath: /health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DPO_COMPANY_TOKEN
+        sync: false
+      - key: DPO_SERVICE_TYPE
+        value: "3854"
+      - key: DPO_API_URL
+        value: "https://secure.3gdirectpay.com"
+
